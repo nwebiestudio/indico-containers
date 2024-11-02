@@ -23,10 +23,10 @@ RUN git clone --depth 1 --branch ${tag} \
     https://github.com/indico/indico.git /opt/indico/src
 
 WORKDIR /opt/indico/src
+RUN  python -m venv ${INDICO_VIRTUALENV} && \
+    ${pip} install -U --no-cache-dir click pip setuptools wheel && \
+    ${pip} install --no-cache-dir -e '.[dev]'
 RUN --mount=type=secret,id=tx_token,env=TX_TOKEN \
-    python -m venv ${INDICO_VIRTUALENV} && \
-    ${pip} install -U --no-cache-dir pip setuptools wheel && \
-    ${pip} install --no-cache-dir -e '.[dev]' && \
     npm ci && \
     ${INDICO_VIRTUALENV}/bin/indico i18n pull indico ${tx_locales} && \
     ${INDICO_VIRTUALENV}/bin/indico i18n check-format-strings && \
