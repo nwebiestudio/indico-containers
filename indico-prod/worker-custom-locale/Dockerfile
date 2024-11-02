@@ -16,7 +16,7 @@ RUN apt-get update && \
 
 # Install transifex CLI
 WORKDIR /bin
-RUN https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
+RUN curl https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
 
 # Clone indico repo
 RUN git clone --depth 1 --branch ${tag} \
