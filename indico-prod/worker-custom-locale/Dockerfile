@@ -1,9 +1,9 @@
 FROM python:3.12-bookworm AS builder
 
+ENV INDICO_VIRTUALENV="/opt/indico/.venv"
 ARG tx_locales="ru_RU" \
     tag="latest" \
     pip="${INDICO_VIRTUALENV}/bin/pip"
-ENV INDICO_VIRTUALENV="/opt/indico/.venv"
 
 SHELL ["/bin/bash", "-exo", "pipefail", "-c"]
 # Install build dependencies
@@ -31,8 +31,8 @@ RUN --mount=type=secret,id=tx_token,env=TX_TOKEN \
     ${INDICO_VIRTUALENV}/bin/indico i18n pull indico ${tx_locales} && \
     ${INDICO_VIRTUALENV}/bin/indico i18n check-format-strings && \
     ${INDICO_VIRTUALENV}/bin/indico i18n compile indico && \
-    ./bin/maintenance/update_moment_locales.py && \
-    ./bin/maintenance/build-wheel.py indico --ignore-unclean && \
+    ${INDICO_VIRTUALENV}/bin/python ./bin/maintenance/update_moment_locales.py && \
+    ${INDICO_VIRTUALENV}/bin/python ./bin/maintenance/build-wheel.py indico --ignore-unclean && \
     chmod 755 dist/indico-${tag}-py3-none-any.whl
 
 
@@ -74,8 +74,7 @@ RUN chmod g=u /etc/passwd
 # all the installations etc can be done using the unprivileged indico user
 USER indico
 
-RUN set -ex && \
-    python -m venv ${INDICO_VIRTUALENV} && \
+RUN python -m venv ${INDICO_VIRTUALENV} && \
     ${pip} install --no-cache-dir --upgrade pip setuptools wheel && \
     ${pip} install --no-cache-dir uwsgi
 
