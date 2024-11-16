@@ -23,18 +23,18 @@ RUN git clone --depth 1 --branch ${tag} \
     https://github.com/indico/indico.git /opt/indico/src
 
 WORKDIR /opt/indico/src
-RUN  python -m venv ${INDICO_VIRTUALENV} && \
-    ${pip} install -U --no-cache-dir click pip setuptools wheel && \
+RUN python -m venv ${INDICO_VIRTUALENV} && \
+    ${pip} install -U --no-cache-dir pip setuptools wheel && \
     ${pip} install --no-cache-dir -e '.[dev]'
+ENV PATH="${INDICO_VIRTUALENV}/bin:$PATH"
 RUN --mount=type=secret,id=tx_token,env=TX_TOKEN \
     npm ci && \
     ${INDICO_VIRTUALENV}/bin/indico i18n pull indico ${tx_locales} && \
     ${INDICO_VIRTUALENV}/bin/indico i18n check-format-strings && \
     ${INDICO_VIRTUALENV}/bin/indico i18n compile indico && \
-    ${INDICO_VIRTUALENV}/bin/python ./bin/maintenance/update_moment_locales.py && \
-    ${INDICO_VIRTUALENV}/bin/python ./bin/maintenance/build-wheel.py indico --ignore-unclean && \
-    chmod 755 dist/indico-${tag}-py3-none-any.whl
-
+    ./bin/maintenance/update_moment_locales.py && \
+    ./bin/maintenance/build-wheel.py indico --ignore-unclean && \
+    chmod 755 -R dist
 
 FROM python:3.12-bookworm
 
@@ -79,8 +79,8 @@ RUN python -m venv ${INDICO_VIRTUALENV} && \
     ${pip} install --no-cache-dir uwsgi
 
 
-RUN --mount=type=bind,from=builder,source=/opt/indico/dist,destination=/tmp/indico/dist \
-    ${pip} install --no-cache-dir /tmp/indico/dist/indico-${tag}-py3-none-any.whl && \
+RUN --mount=type=bind,from=builder,source=/opt/indico/src/dist,destination=/tmp/indico/dist \
+    ${pip} install --no-cache-dir /tmp/indico/dist/indico-*.whl && \
     ${pip} install --no-cache-dir indico-plugins
 
 RUN ${INDICO_VIRTUALENV}/bin/indico setup create-symlinks /opt/indico
