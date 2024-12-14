@@ -2,7 +2,8 @@ services:
   # The main Indico container which runs flask
   # The same image is also used to run celery
   indico-web: &indico-web
-    build: worker
+    image: getindico/indico:latest
+    build: ${BUILD_DIR}
     command: /opt/indico/run_indico.sh
     depends_on:
       - indico-redis
@@ -16,14 +17,14 @@ services:
       - backend
       - frontend
     ports:
-     # Indico is accessible either via nginx (localhost:8080 by default), or
-     # directly via localhost:9090. In that case, static assets are served by flask
+      # Indico is accessible either via nginx (localhost:8080 by default), or
+      # directly via localhost:9090. In that case, static assets are served by flask
       - "9090:59999"
     volumes:
-      - 'archive:/opt/indico/archive' # file storage
-      - 'customization:/opt/indico/custom'
-      - 'static-files:/opt/indico/static'
-      - 'indico-logs:/opt/indico/log' # logs
+      - "archive:/opt/indico/archive" # file storage
+      - "customization:/opt/indico/custom"
+      - "static-files:/opt/indico/static"
+      - "indico-logs:/opt/indico/log" # logs
       - type: bind
         source: ${INDICO_CONFIG}
         target: /opt/indico/etc/indico.conf
@@ -53,7 +54,7 @@ services:
     networks:
       - backend
     volumes:
-      - 'redis:/data'
+      - "redis:/data"
   # Postgres
   indico-postgres:
     image: postgres:15-bookworm
@@ -64,7 +65,7 @@ services:
     networks:
       - backend
     volumes:
-      - 'postgres-data:/var/lib/postgresql/data'
+      - "postgres-data:/var/lib/postgresql/data"
   # Nginx proxy
   # Indico can be accessed by default via localhost:8080
   indico-nginx:
@@ -74,8 +75,8 @@ services:
     ports:
       - "${NGINX_PORT:-8080}:8080"
     volumes:
-      - 'static-files:/opt/indico/static:ro'
-      - './nginx.conf:/etc/nginx/conf.d/default.conf:ro'
+      - "static-files:/opt/indico/static:ro"
+      - "./nginx.conf:/etc/nginx/conf.d/default.conf:ro"
 
 volumes:
   postgres-data:
