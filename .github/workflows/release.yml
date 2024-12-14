@@ -19,7 +19,8 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-24.04
     steps:
-      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/setup-buildx-action@v3.7.1
       - uses: actions/checkout@v4
 
       - name: Get version
@@ -35,7 +36,8 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker 👀
         id: meta
-        uses: docker/metadata-action@v5
+
+        uses: docker/metadata-action@v5.6.1
         with:
           images: |
             ghcr.io/${{ steps.owner.outputs.owner }}/indico
@@ -44,7 +46,8 @@ jobs:
           #   type=semver,pattern={{version}}-${{ steps.version.outputs.build_date }}-${{ inputs.locales }},value=${{ steps.version.outputs.indico_version }}
 
       - name: Build Docker image 🚢
-        uses: docker/build-push-action@v6
+
+        uses: docker/build-push-action@v6.10.0
         with:
           context: indico-prod/worker-custom-locale
           tags: ${{ steps.meta.outputs.tags }}
