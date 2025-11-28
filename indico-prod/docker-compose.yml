@@ -25,6 +25,7 @@ services:
       - "customization:/opt/indico/custom"
       - "static-files:/opt/indico/static"
       - "indico-logs:/opt/indico/log" # logs
+      - "./custom-plugins:/opt/indico/plugins" # custom plugins from this repository
       - type: bind
         source: ${INDICO_CONFIG}
         target: /opt/indico/etc/indico.conf
